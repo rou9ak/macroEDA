@@ -1,0 +1,122 @@
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{setspace}
+
+\title{\textbf{Mathematical Foundations of Macroeconomic EDA:\\ A Deep Dive into Transformation and Estimation}}
+\author{Rounak Paul}
+\date{2nd March, 2026}
+
+\begin{spacing}{1.15}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This document outlines the mathematical frameworks and statistical estimators I employed in analyzing the Gapminder dataset. Moving beyond descriptive statistics, I explore the calculus behind log-linear transformations for elasticity interpretations and derive the Ordinary Least Squares (OLS) estimator using matrix algebra.
+\end{abstract}
+
+\section{The Log-Linear Model and Interpretation}
+
+In the exploratory data analysis, I observed that GDP per capita exhibits extreme positive skewness. To satisfy the classical linear regression assumptions and stabilize variance, I applied a natural logarithmic transformation. The resulting empirical model is a level-log (or linear-log) specification:
+
+\begin{equation}
+    y_i = \beta_0 + \beta_1 \ln(x_i) + \epsilon_i
+    \end{equation}
+
+    where $y_i$ represents the life expectancy of country $i$, $x_i$ is the GDP per capita, $\beta_0, \beta_1$ are the parameters to be estimated, and $\epsilon_i$ is the stochastic error term.
+
+    \subsection{Calculus of the Marginal Effect}
+
+    The primary advantage of this specification is its interpretation regarding marginal changes. Taking the derivative of $y$ with respect to $x$:
+
+    \begin{equation}
+        \frac{dy}{dx} = \beta_1 \frac{d}{dx} \ln(x) = \frac{\beta_1}{x}
+        \end{equation}
+
+        Rearranging differentials to express the change in $y$ as a function of the percentage change in $x$:
+
+        \begin{equation}
+            dy = \beta_1 \left( \frac{dx}{x} \right)
+            \end{equation}
+
+            Since $\frac{dx}{x}$ represents the proportional change in GDP per capita, a $1\%$ increase in $x$ ($\frac{dx}{x} = 0.01$) leads to an expected absolute change in life expectancy of $0.01 \cdot \beta_1$ years. This captures the diminishing marginal returns of wealth on public health.
+
+            \section{Ordinary Least Squares (OLS) Estimation}
+
+            To estimate the parameter vector $\boldsymbol{\beta}$, I utilized the Ordinary Least Squares (OLS) method. Rather than relying on summation operators, I formulate the problem using matrix algebra for $n$ observations and $k$ parameters (here, $k=2$).
+
+            Let the data generation process be defined as:
+            \begin{equation}
+                \mathbf{y} = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\epsilon}
+                \end{equation}
+
+                Where:
+                \begin{itemize}
+                    \item $\mathbf{y}$ is an $n \times 1$ vector of the dependent variable (Life Expectancy).
+                        \item $\mathbf{X}$ is an $n \times k$ design matrix, where the first column is a vector of ones (for the intercept $\beta_0$) and the second column is $\ln(x_i)$.
+                            \item $\boldsymbol{\beta}$ is a $k \times 1$ vector of unknown parameters.
+                                \item $\boldsymbol{\epsilon}$ is an $n \times 1$ vector of unobserved disturbances.
+                                \end{itemize}
+
+                                \subsection{Objective Function and Matrix Derivation}
+
+                                The OLS estimator, denoted as $\hat{\boldsymbol{\beta}}$, is found by minimizing the Sum of Squared Residuals (SSR). The residual vector is $\mathbf{e} = \mathbf{y} - \mathbf{X}\hat{\boldsymbol{\beta}}$. I aim to minimize the scalar value $\mathbf{e}^T\mathbf{e}$:
+
+                                \begin{align}
+                                    \min_{\hat{\boldsymbol{\beta}}} S(\hat{\boldsymbol{\beta}}) &= (\mathbf{y} - \mathbf{X}\hat{\boldsymbol{\beta}})^T (\mathbf{y} - \mathbf{X}\hat{\boldsymbol{\beta}}) \nonumber \\
+                                        &= \mathbf{y}^T\mathbf{y} - \mathbf{y}^T\mathbf{X}\hat{\boldsymbol{\beta}} - \hat{\boldsymbol{\beta}}^T\mathbf{X}^T\mathbf{y} + \hat{\boldsymbol{\beta}}^T\mathbf{X}^T\mathbf{X}\hat{\boldsymbol{\beta}}
+                                        \end{align}
+
+                                        Since $\mathbf{y}^T\mathbf{X}\hat{\boldsymbol{\beta}}$ is a scalar, it is equal to its transpose $\hat{\boldsymbol{\beta}}^T\mathbf{X}^T\mathbf{y}$. Thus:
+
+                                        \begin{equation}
+                                            S(\hat{\boldsymbol{\beta}}) = \mathbf{y}^T\mathbf{y} - 2\hat{\boldsymbol{\beta}}^T\mathbf{X}^T\mathbf{y} + \hat{\boldsymbol{\beta}}^T\mathbf{X}^T\mathbf{X}\hat{\boldsymbol{\beta}}
+                                            \end{equation}
+
+                                            To find the minimum, I take the gradient with respect to the vector $\hat{\boldsymbol{\beta}}$ and set it to the zero vector:
+
+                                            \begin{equation}
+                                                \frac{\partial S}{\partial \hat{\boldsymbol{\beta}}} = -2\mathbf{X}^T\mathbf{y} + 2\mathbf{X}^T\mathbf{X}\hat{\boldsymbol{\beta}} = \mathbf{0}
+                                                \end{equation}
+
+                                                This yields the normal equations:
+
+                                                \begin{equation}
+                                                    \mathbf{X}^T\mathbf{X}\hat{\boldsymbol{\beta}} = \mathbf{X}^T\mathbf{y}
+                                                    \end{equation}
+
+                                                    Assuming the design matrix $\mathbf{X}$ has full column rank (no perfect multicollinearity), the matrix $(\mathbf{X}^T\mathbf{X})$ is invertible. Pre-multiplying by its inverse isolates $\hat{\boldsymbol{\beta}}$:
+
+                                                    \begin{equation}
+                                                        \hat{\boldsymbol{\beta}} = (\mathbf{X}^T\mathbf{X})^{-1}\mathbf{X}^T\mathbf{y}
+                                                        \end{equation}
+
+                                                        This is the fundamental closed-form solution I executed via the \texttt{statsmodels} library in the computational phase of the project.
+
+                                                        \section{Pearson Correlation and Multicollinearity}
+
+                                                        Prior to regression, I computed the Pearson correlation matrix. The sample correlation coefficient between two variables, $u$ and $v$, is the ratio of their sample covariance to the product of their sample standard deviations:
+
+                                                        \begin{equation}
+                                                            r_{uv} = \frac{\sum_{i=1}^{n} (u_i - \bar{u})(v_i - \bar{v})}{\sqrt{\sum_{i=1}^{n} (u_i - \bar{u})^2} \sqrt{\sum_{i=1}^{n} (v_i - \bar{v})^2}}
+                                                            \end{equation}
+
+                                                            In vector notation, letting $\tilde{\mathbf{u}}$ and $\tilde{\mathbf{v}}$ be mean-centered vectors, the correlation is the cosine of the angle $\theta$ between them in $n$-dimensional Euclidean space:
+
+                                                            \begin{equation}
+                                                                r_{uv} = \cos(\theta) = \frac{\tilde{\mathbf{u}} \cdot \tilde{\mathbf{v}}}{\|\tilde{\mathbf{u}}\| \|\tilde{\mathbf{v}}\|}
+                                                                \end{equation}
+
+                                                                This geometric interpretation confirms why $r_{uv} \in [-1, 1]$, bounded by the Cauchy-Schwarz inequality. I used this metric to verify that independent variables are not highly linearly dependent, ensuring the invertibility of $(\mathbf{X}^T\mathbf{X})$ in the regression space.
+
+                                                                \end{document}
+                                                                \end{spacing}
+                                                                
